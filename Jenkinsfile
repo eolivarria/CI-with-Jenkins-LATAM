@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         //Docker Hub username
-        DOCKER_IMAGE_NAME = "eolivarria/tomcat01"
+        DOCKER_IMAGE_NAME = "eolivarria/final"
     }
     stages {
      stage('Checkout SCM') {
