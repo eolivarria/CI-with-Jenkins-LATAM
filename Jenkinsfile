@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         //Docker Hub username
-        DOCKER_IMAGE_NAME = "eolivarria/final"
+        DOCKER_IMAGE_NAME = "eolivarria/devops:${env.BUILD_ID}"
     }
     stages {
      stage('Checkout SCM') {
@@ -24,30 +24,22 @@ pipeline {
        sh 'mvn test'
       }
      }
-       
-        stage('Build Docker Image') {
-            when {
-                branch 'master'
-            }
-            steps {
-                script {
-                    app = docker.build(DOCKER_IMAGE_NAME)
-                }
-            }
-        }
-        stage('Push Docker Image') {
-            when {
-                branch 'master'
-            }
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
+     stage('Build and push Docker Image') {
+      steps{
+        script {
+           //appimage = docker.build( "almitarosita/devops:${env.BUILD_ID}")
+           //appimage = docker.build("gcr.io/vaulted-quarter-260801/devops:${env.BUILD_ID}")
+            appimage = docker.build(DOCKER_IMAGE_NAME)
+           //docker.withRegistry("https://registry.hub.docker.com",'docker-hub-credentials') 
+           //docker.withRegistry('https://gcr.io','gcr:gcr'){ appimage.push("${env.BUILD_ID}")           }
+            docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
+                        appimage.push("${env.BUILD_NUMBER}")
+                        appimage.push("latest")
                     }
-                }
-            }
-        }
+         }
+       }
+      }
+        
         stage('DeployToProduction') {
             when {
                 branch 'master'
