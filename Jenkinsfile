@@ -31,7 +31,6 @@ pipeline {
             steps {
                 script {
                     appimage = docker.build(DOCKER_IMAGE_NAME)
-                    //myapp = docker.build("DOCKER-HUB-USERNAME/devops:${env.BUILD_ID}")
                 }
             }
         }
