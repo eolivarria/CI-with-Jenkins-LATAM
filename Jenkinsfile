@@ -3,6 +3,10 @@ pipeline {
     environment {
         //Docker Hub username
         DOCKER_IMAGE_NAME = "eolivarria/devops:${env.BUILD_ID}"
+        PROJECT_ID = 'soy-reporter-289518'
+        CLUSTER_NAME = 'kube-demo'
+        LOCATION = 'us-west4-c'
+        CREDENTIALS_ID = 'gke'
     }
     stages {
      stage('Checkout SCM') {
@@ -17,8 +21,7 @@ pipeline {
          sh 'mvn clean package'
         }
     }
-        
-     stage('Test') {
+    stage('Test') {
       steps {
        echo "Testing.."
        sh 'mvn test'
@@ -28,7 +31,7 @@ pipeline {
             steps {
                 script {
                     appimage = docker.build(DOCKER_IMAGE_NAME)
-                    //myapp = docker.build("DOCKER-HUB-USERNAME/hello:${env.BUILD_ID}")
+                    //myapp = docker.build("DOCKER-HUB-USERNAME/devops:${env.BUILD_ID}")
                 }
             }
         }
@@ -38,24 +41,18 @@ pipeline {
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
                             //myapp.push("latest")
                             //myapp.push("${env.BUILD_ID}")
-                        appimage.push("${env.BUILD_NUMBER}")
-                        appimage.push("latest")
+                        appimage.push("${env.BUILD_ID}")
                     }
                 }
             }
-        }         
-        stage('DeployToProduction') {
-            when {
-                branch 'master'
-            }
-            steps {
-                milestone(1)
-                kubernetesDeploy(
-                    kubeconfigId: 'kubeconfig',
-                    configs: 'deployment.yaml',
-                    enableConfigSubstitution: true
-                )
+        }
+    stage('Deploy to GKE cluster') {
+            steps{
+                sh "sed -i 's/devops:latest/devops:${env.BUILD_ID}/g' deployment.yaml"
+                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
+                echo "Deployment to Kubernetes cluster completed.."
             }
         }
+        
     }
 }
