@@ -4,7 +4,7 @@ pipeline {
         //Docker Hub username
         DOCKER_IMAGE_NAME = "eolivarria/devops:${env.BUILD_ID}"
         PROJECT_ID = 'soy-reporter-289518'
-        CLUSTER_NAME = 'kube-demo'
+        CLUSTER_NAME = 'kubernetes'
         LOCATION = 'us-west4-c'
         CREDENTIALS_ID = 'gke'
     }
