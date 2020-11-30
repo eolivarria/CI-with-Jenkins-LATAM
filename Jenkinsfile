@@ -24,22 +24,26 @@ pipeline {
        sh 'mvn test'
       }
      }
-     stage('Build and push Docker Image') {
-      steps{
-        script {
-           //appimage = docker.build( "almitarosita/devops:${env.BUILD_ID}")
-           //appimage = docker.build("gcr.io/vaulted-quarter-260801/devops:${env.BUILD_ID}")
-            appimage = docker.build(DOCKER_IMAGE_NAME)
-           //docker.withRegistry("https://registry.hub.docker.com",'docker-hub-credentials') 
-           //docker.withRegistry('https://gcr.io','gcr:gcr'){ appimage.push("${env.BUILD_ID}")           }
-            docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
+     stage("Build image") {
+            steps {
+                script {
+                    appimage = docker.build(DOCKER_IMAGE_NAME)
+                    //myapp = docker.build("DOCKER-HUB-USERNAME/hello:${env.BUILD_ID}")
+                }
+            }
+        }
+     stage("Push image") {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                            //myapp.push("latest")
+                            //myapp.push("${env.BUILD_ID}")
                         appimage.push("${env.BUILD_NUMBER}")
                         appimage.push("latest")
                     }
-         }
-       }
-      }
-        
+                }
+            }
+        }         
         stage('DeployToProduction') {
             when {
                 branch 'master'
