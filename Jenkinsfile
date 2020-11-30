@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
 //                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {appimage.push("${env.BUILD_ID}")}
-                    docker.withRegistry('https://gcr.io','gcr:gcr'){
+                    docker.withRegistry('https://gcr.io','gcr:google-container-registry'){
                         appimage.push("${env.BUILD_ID}")
                     }
                 }
